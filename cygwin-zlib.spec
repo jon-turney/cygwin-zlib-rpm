@@ -14,6 +14,7 @@ Source0:        http://www.zlib.net/zlib-%{version}.tar.gz
 Patch0:         zlib-1.2.5-minizip-fixuncrypt.patch
 Patch100:       zlib-1.2.7-minizip-cygwin.patch
 Patch101:       zlib-1.2.8-vpath.patch
+Patch102:       zlib-1.2.11-gzopen_w.patch
 
 BuildRequires:  cygwin32-filesystem >= 11
 BuildRequires:  cygwin32-gcc
@@ -83,8 +84,8 @@ Minizip library for the Cygwin x86_64 cross-compiler toolchain.
 %patch0 -p1
 %patch100 -p2
 %patch101 -p2
+%patch102 -p2
 iconv -f windows-1252 -t utf-8 <ChangeLog >ChangeLog.tmp
-sed -i -e '/gzopen_w/d' win32/zlib.def
 pushd contrib/minizip
 %cygwin_autoreconf
 popd

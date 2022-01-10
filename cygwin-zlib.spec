@@ -2,17 +2,15 @@
 
 Name:           cygwin-zlib
 Version:        1.2.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Cygwin zlib compression library
 
 License:        zlib
 Group:          Development/Libraries
-URL:            http://www.zlib.net/
+URL:            https://zlib.net/
 BuildArch:      noarch
 
-Source0:        http://www.zlib.net/zlib-%{version}.tar.gz
-Patch0:         zlib-1.2.5-minizip-fixuncrypt.patch
-Patch100:       zlib-1.2.7-minizip-cygwin.patch
+Source0:        https://zlib.net/zlib-%{version}.tar.gz
 Patch101:       zlib-1.2.8-vpath.patch
 Patch102:       zlib-1.2.11-gzopen_w.patch
 
@@ -24,7 +22,7 @@ BuildRequires:  cygwin64-filesystem >= 11
 BuildRequires:  cygwin64-gcc
 BuildRequires:  cygwin64-binutils
 
-BuildRequires:  autoconf automake cygwin-libtool-base
+BuildRequires:  make
 
 %description
 Cygwin zlib compression library.
@@ -59,36 +57,13 @@ Requires:       cygwin64-zlib = %{version}-%{release}
 %description -n cygwin64-zlib-static
 The cygwin64-zlib-static package contains static library for cygwin64-zlib development.
 
-%package -n cygwin32-minizip
-Summary:        Minizip library for Cygwin32 toolchain
-Group:          Development/Libraries
-Requires:       cygwin32-zlib = %{version}-%{release}
-
-%description -n cygwin32-minizip
-Minizip library for the Cygwin i686 cross-compiler toolchain.
-
-%package -n cygwin64-minizip
-Summary:   Minizip library for Cygwin64 toolchain
-Group:     Development/Libraries
-Requires:  cygwin64-zlib = %{version}-%{release}
-
-%description -n cygwin64-minizip
-Minizip library for the Cygwin x86_64 cross-compiler toolchain.
-
 
 %{?cygwin_debug_package}
 
 
 %prep
-%setup -q -n zlib-%{version}
-%patch0 -p1
-%patch100 -p2
-%patch101 -p2
-%patch102 -p2
+%autosetup -p2 -n zlib-%{version}
 iconv -f windows-1252 -t utf-8 <ChangeLog >ChangeLog.tmp
-pushd contrib/minizip
-%cygwin_autoreconf
-popd
 
 %build
 mkdir -p build_32bit
@@ -113,13 +88,6 @@ make -f ../win32/Makefile.gcc \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all
-popd
-
-pushd contrib/minizip
-%cygwin_configure --disable-static
-CYGWIN32_MAKE_ARGS="zlib_top_builddir=../../../build_32bit"
-CYGWIN64_MAKE_ARGS="zlib_top_builddir=../../../build_64bit"
-%cygwin_make %{?_smp_flags}
 popd
 
 
@@ -150,13 +118,6 @@ make -f ../win32/Makefile.gcc \
   install
 popd
 
-pushd contrib/minizip
-%cygwin_make install DESTDIR=$RPM_BUILD_ROOT
-popd
-
-# We intentionally don't ship *.la files
-find $RPM_BUILD_ROOT -name '*.la' -delete
-
 # Remove the documentation and manpages which duplicate Fedora native
 rm -rf $RPM_BUILD_ROOT/%{cygwin32_mandir}
 rm -rf $RPM_BUILD_ROOT/%{cygwin64_mandir}
@@ -172,12 +133,6 @@ rm -rf $RPM_BUILD_ROOT/%{cygwin64_mandir}
 %files -n cygwin32-zlib-static
 %{cygwin32_libdir}/libz.a
 
-%files -n cygwin32-minizip
-%{cygwin32_bindir}/cygminizip-1.dll
-%{cygwin32_includedir}/minizip/
-%{cygwin32_libdir}/libminizip.dll.a
-%{cygwin32_libdir}/pkgconfig/minizip.pc
-
 %files -n cygwin64-zlib
 %{cygwin64_bindir}/cygz.dll
 %{cygwin64_includedir}/zconf.h
@@ -188,14 +143,11 @@ rm -rf $RPM_BUILD_ROOT/%{cygwin64_mandir}
 %files -n cygwin64-zlib-static
 %{cygwin64_libdir}/libz.a
 
-%files -n cygwin64-minizip
-%{cygwin64_bindir}/cygminizip-1.dll
-%{cygwin64_includedir}/minizip/
-%{cygwin64_libdir}/libminizip.dll.a
-%{cygwin64_libdir}/pkgconfig/minizip.pc
-
 
 %changelog
+* Mon Jan 10 2022 Yaakov Selkowitz <yselkowi@redhat.com> - 1.2.11-2
+- Drop minizip subpackage.
+
 * Tue Dec 05 2017 Yaakov Selkowitz <yselkowi@redhat.com> - 1.2.11-1
 - new version
 

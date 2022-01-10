@@ -68,7 +68,7 @@ iconv -f windows-1252 -t utf-8 <ChangeLog >ChangeLog.tmp
 %build
 mkdir -p build_32bit
 pushd build_32bit
-ln -s ../zlib.h .
+ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin32_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin32_cc} AR=%{cygwin32_ar} RC=%{cygwin32_windres} STRIP=: \
@@ -80,7 +80,7 @@ popd
 
 mkdir -p build_64bit
 pushd build_64bit
-ln -s ../zlib.h .
+ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin64_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin64_cc} AR=%{cygwin64_ar} RC=%{cygwin64_windres} STRIP=: \

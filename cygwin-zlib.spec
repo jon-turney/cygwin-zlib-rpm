@@ -2,7 +2,7 @@
 
 Name:           cygwin-zlib
 Version:        1.2.11
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Cygwin zlib compression library
 
 License:        zlib
@@ -10,7 +10,7 @@ Group:          Development/Libraries
 URL:            https://zlib.net/
 BuildArch:      noarch
 
-Source0:        https://zlib.net/zlib-%{version}.tar.gz
+Source0:        https://zlib.net/fossils/zlib-%{version}.tar.gz
 Patch101:       zlib-1.2.8-vpath.patch
 Patch102:       zlib-1.2.11-gzopen_w.patch
 
@@ -22,40 +22,60 @@ BuildRequires:  cygwin64-filesystem >= 11
 BuildRequires:  cygwin64-gcc
 BuildRequires:  cygwin64-binutils
 
+BuildRequires:  cygwin-aarch64-filesystem >= 151
+BuildRequires:  cygwin-aarch64-gcc
+BuildRequires:  cygwin-aarch64-binutils
+
 BuildRequires:  make
 
 %description
 Cygwin zlib compression library.
 
 %package -n cygwin32-zlib
-Summary:        Cygwin32 zlib compression library
+Summary:        Cygwin i686 zlib compression library
 Group:          Development/Libraries
 
 %description -n cygwin32-zlib
 zlib compression library for Cygwin i686 toolchain.
 
 %package -n cygwin64-zlib
-Summary:        Cygwin64 zlib compression library
+Summary:        Cygwin x86_64 zlib compression library
 Group:          Development/Libraries
 
 %description -n cygwin64-zlib
 zlib compression library for Cygwin x86_64 toolchain.
 
+%package -n cygwin-aarch64-zlib
+Summary:        Cygwin aarch64 zlib compression library
+Group:          Development/Libraries
+
+%description -n cygwin-aarch64-zlib
+zlib compression library for Cygwin aarch64 toolchain.
+
 %package -n cygwin32-zlib-static
-Summary:        Static libraries for cygwin32-zlib development.
+Summary:        Static libraries for Cygwin i686 zlib development
 Group:          Development/Libraries
 Requires:       cygwin32-zlib = %{version}-%{release}
 
 %description -n cygwin32-zlib-static
-The cygwin32-zlib-static package contains static library for cygwin32-zlib development.
+The cygwin32-zlib-static package contains static library for cygwin x86 zlib development.
 
 %package -n cygwin64-zlib-static
-Summary:        Static libraries for cygwin64-zlib development.
+Summary:        Static libraries for cygwin x86_64 zlib development
 Group:          Development/Libraries
 Requires:       cygwin64-zlib = %{version}-%{release}
 
 %description -n cygwin64-zlib-static
-The cygwin64-zlib-static package contains static library for cygwin64-zlib development.
+The cygwin64-zlib-static package contains static library for cygwin x86_64 zlib development.
+
+%package -n cygwin-aarch64-zlib-static
+Summary:        Static libraries for cygwin aarch64 zlib development
+Group:          Development/Libraries
+Requires:       cygwin-aarch64-zlib = %{version}-%{release}
+
+%description -n cygwin-aarch64-zlib-static
+The cygwin-aarch64-zlib-static package contains static library for cygwin x86_64 zlib development.
+
 
 
 %{?cygwin_debug_package}
@@ -63,7 +83,6 @@ The cygwin64-zlib-static package contains static library for cygwin64-zlib devel
 
 %prep
 %autosetup -p2 -n zlib-%{version}
-iconv -f windows-1252 -t utf-8 <ChangeLog >ChangeLog.tmp
 
 %build
 mkdir -p build_32bit
@@ -72,7 +91,7 @@ ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin32_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin32_cc} AR=%{cygwin32_ar} RC=%{cygwin32_windres} STRIP=: \
-  CFLAGS="%{cygwin32_cflags}" \
+  CFLAGS="%{cygwin32_cflags} -std=c99 -Wno-error" \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all
@@ -84,7 +103,19 @@ ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin64_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin64_cc} AR=%{cygwin64_ar} RC=%{cygwin64_windres} STRIP=: \
-  CFLAGS="%{cygwin64_cflags}" \
+  CFLAGS="%{cygwin64_cflags} -std=c99 -Wno-error" \
+  SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
+  VPATH=.. \
+  all
+popd
+
+mkdir -p build_aarch64
+pushd build_aarch64
+ln -s ../zlib.h ../zlib.pc.in .
+CHOST=%{cygwin_aarch64_target} ../configure
+make -f ../win32/Makefile.gcc \
+  CC=%{cygwin_aarch64_cc} AR=%{cygwin_aarch64_ar} RC=%{cygwin_aarch64_windres} STRIP=: \
+  CFLAGS="%{cygwin_aarch64_cflags} -std=c99 -Wno-error" \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all
@@ -118,9 +149,23 @@ make -f ../win32/Makefile.gcc \
   install
 popd
 
+pushd build_aarch64
+make -f ../win32/Makefile.gcc \
+  DESTDIR=$RPM_BUILD_ROOT \
+  BINARY_PATH=%{cygwin_aarch64_bindir} \
+  INCLUDE_PATH=%{cygwin_aarch64_includedir} \
+  LIBRARY_PATH=%{cygwin_aarch64_libdir} \
+  SHARED_MODE=1 \
+  SHAREDLIB=cygz.dll \
+  IMPLIB=libz.dll.a \
+  VPATH=.. \
+  install
+popd
+
 # Remove the documentation and manpages which duplicate Fedora native
 rm -rf $RPM_BUILD_ROOT/%{cygwin32_mandir}
 rm -rf $RPM_BUILD_ROOT/%{cygwin64_mandir}
+rm -rf $RPM_BUILD_ROOT/%{cygwin_aarch64_mandir}
 
 
 %files -n cygwin32-zlib
@@ -143,8 +188,21 @@ rm -rf $RPM_BUILD_ROOT/%{cygwin64_mandir}
 %files -n cygwin64-zlib-static
 %{cygwin64_libdir}/libz.a
 
+%files -n cygwin-aarch64-zlib
+%{cygwin_aarch64_bindir}/cygz.dll
+%{cygwin_aarch64_includedir}/zconf.h
+%{cygwin_aarch64_includedir}/zlib.h
+%{cygwin_aarch64_libdir}/libz.dll.a
+%{cygwin_aarch64_libdir}/pkgconfig/zlib.pc
+
+%files -n cygwin-aarch64-zlib-static
+%{cygwin_aarch64_libdir}/libz.a
+
 
 %changelog
+* Sun Sep 27 2026 Jon Turney <jon.turney@dronecode.org.uk> - 1.2.11-3
+- Add aarch64
+
 * Mon Jan 10 2022 Yaakov Selkowitz <yselkowi@redhat.com> - 1.2.11-2
 - Drop minizip subpackage.
 

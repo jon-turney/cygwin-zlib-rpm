@@ -85,13 +85,16 @@ The cygwin-aarch64-zlib-static package contains static library for cygwin x86_64
 %autosetup -p2 -n zlib-%{version}
 
 %build
+unset CC
+unset CFLAGS
+
 mkdir -p build_32bit
 pushd build_32bit
 ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin32_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin32_cc} AR=%{cygwin32_ar} RC=%{cygwin32_windres} STRIP=: \
-  CFLAGS="%{cygwin32_cflags} -std=c99 -Wno-error" \
+  CFLAGS="%{cygwin32_cflags} -std=c90" \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all
@@ -103,7 +106,7 @@ ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin64_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin64_cc} AR=%{cygwin64_ar} RC=%{cygwin64_windres} STRIP=: \
-  CFLAGS="%{cygwin64_cflags} -std=c99 -Wno-error" \
+  CFLAGS="%{cygwin64_cflags} -std=c90" \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all
@@ -115,7 +118,7 @@ ln -s ../zlib.h ../zlib.pc.in .
 CHOST=%{cygwin_aarch64_target} ../configure
 make -f ../win32/Makefile.gcc \
   CC=%{cygwin_aarch64_cc} AR=%{cygwin_aarch64_ar} RC=%{cygwin_aarch64_windres} STRIP=: \
-  CFLAGS="%{cygwin_aarch64_cflags} -std=c99 -Wno-error" \
+  CFLAGS="%{cygwin_aarch64_cflags} -std=c90" \
   SHAREDLIB=cygz.dll IMPLIB=libz.dll.a \
   VPATH=.. \
   all

@@ -1,8 +1,8 @@
 %{?cygwin_package_header}
 
 Name:           cygwin-zlib
-Version:        1.2.11
-Release:        3%{?dist}
+Version:        1.3.2
+Release:        1%{?dist}
 Summary:        Cygwin zlib compression library
 
 License:        zlib
@@ -10,9 +10,10 @@ Group:          Development/Libraries
 URL:            https://zlib.net/
 BuildArch:      noarch
 
-Source0:        https://zlib.net/fossils/zlib-%{version}.tar.gz
-Patch101:       zlib-1.2.8-vpath.patch
-Patch102:       zlib-1.2.11-gzopen_w.patch
+Source0:        https://zlib.net/zlib-%{version}.tar.gz
+Patch101:       zlib-1.3.2-vpath.patch
+Patch102:       zlib-1.3.2-configure.patch
+Patch103:       zlib-1.3.2-gzopen_w.patch
 
 BuildRequires:  cygwin32-filesystem >= 11
 BuildRequires:  cygwin32-gcc
@@ -203,6 +204,9 @@ rm -rf $RPM_BUILD_ROOT/%{cygwin_aarch64_mandir}
 
 
 %changelog
+* Sun Sep 27 2026 Jon Turney <jon.turney@dronecode.org.uk> - 1.3.2-1
+- new version
+
 * Sun Sep 27 2026 Jon Turney <jon.turney@dronecode.org.uk> - 1.2.11-3
 - Add aarch64
 
